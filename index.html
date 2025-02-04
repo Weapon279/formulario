@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Registro</title>
+    <title>Registro de Usuario</title>
     <link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-
 </head>
 <body>
     <div class="container">
-        <form id="registroForm" action="procesar.php" method="POST">
-            <h2>Registro</h2>
+        <form id="registroForm">
+            <h2>Registro de Usuario</h2>
             <div class="form-group">
                 <label for="nombre">Nombre completo:</label>
                 <input type="text" id="nombre" name="nombre" required>
@@ -39,7 +37,36 @@
             </div>
             <button type="submit">Registrarse</button>
         </form>
+        <p><a href="dashboard.html">Ver Dashboard de Usuarios</a></p>
     </div>
     <script src="script.js"></script>
+    <script>
+        document.getElementById('registroForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (validarFormulario()) {
+                const usuario = {
+                    nombre: document.getElementById('nombre').value,
+                    email: document.getElementById('email').value,
+                    telefono: document.getElementById('telefono').value
+                };
+                guardarUsuario(usuario);
+                alert('Usuario registrado con éxito');
+                this.reset();
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        function validarFormulario() {
+            // Aquí iría la lógica de validación que ya tienes en script.js
+            // Retorna true si el formulario es válido, false si no lo es
+            return true; // Cambia esto por tu lógica de validación real
+        }
+
+        function guardarUsuario(usuario) {
+            const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+            usuarios.push(usuario);
+            localStorage.setItem('usuarios', JSON.stringify(usuarios));
+        }
+    </script>
 </body>
 </html>
