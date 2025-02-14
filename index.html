@@ -3,70 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Usuario</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Gestión de Usuarios</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a90e2;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            animation: fadeIn 1s ease;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #357ab7;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        td button {
+            padding: 6px 12px;
+            margin-right: 10px;
+            background-color: #f7b32b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        td button:hover {
+            background-color: #d88d20;
+        }
+
+        td button:last-child {
+            background-color: #e04d49;
+        }
+
+        td button:last-child:hover {
+            background-color: #c7423e;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <form id="registroForm">
-            <h2>Registro de Usuario</h2>
-            <div class="form-group">
-                <label for="nombre">Nombre completo:</label>
-                <input type="text" id="nombre" name="nombre" required>
-                <span class="error" id="nombreError"></span>
-            </div>
-            <div class="form-group">
-                <label for="email">Correo electrónico:</label>
-                <input type="email" id="email" name="email" required>
-                <span class="error" id="emailError"></span>
-            </div>
-            <div class="form-group">
-                <label for="telefono">Número de teléfono:</label>
-                <input type="tel" id="telefono" name="telefono" required>
-                <span class="error" id="telefonoError"></span>
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" required>
-                <span class="error" id="passwordError"></span>
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword">Confirmar contraseña:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
-                <span class="error" id="confirmPasswordError"></span>
-            </div>
-            <button type="submit">Registrarse</button>
-        </form>
-        <p><a href="dashboard.html">Ver Dashboard de Usuarios</a></p>
-    </div>
-    <script src="script.js"></script>
+    <h2>Gestión de Usuarios</h2>
+    <form id="userForm">
+        <input type="number" id="personId" placeholder="Person ID" required>
+        <input type="text" id="user" placeholder="Usuario" required>
+        <input type="password" id="pass" placeholder="Contraseña" required>
+        <input type="text" id="userType" placeholder="Tipo de Usuario" required>
+        <select id="bActive">
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+        </select>
+        <button type="submit">Agregar Usuario</button>
+    </form>
+    
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Tipo</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+    </table>
+    
     <script>
-        document.getElementById('registroForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            if (validarFormulario()) {
-                const usuario = {
-                    nombre: document.getElementById('nombre').value,
-                    email: document.getElementById('email').value,
-                    telefono: document.getElementById('telefono').value
-                };
-                guardarUsuario(usuario);
-                alert('Usuario registrado con éxito');
-                this.reset();
-                window.location.href = 'dashboard.html';
-            }
+        const API_URL = 'http://localhost:3001';
+        
+        async function fetchUsers() {
+            const res = await fetch(`${API_URL}/users`);
+            const users = await res.json();
+            const userTableBody = document.getElementById('userTableBody');
+            userTableBody.innerHTML = users.map(user => `
+                <tr class="fadeIn">
+                    <td>${user.personId}</td>
+                    <td>${user.user}</td>
+                    <td>${user.userType}</td>
+                    <td>${user.bActive ? 'Sí' : 'No'}</td>
+                    <td>
+                        <button onclick="editUser(${user.personId}, '${user.user}', '${user.userType}', ${user.bActive})">Editar</button>
+                        <button onclick="deleteUser(${user.personId})">Eliminar</button>
+                    </td>
+                </tr>`).join('');
+        }
+        
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const personId = document.getElementById('personId').value;
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            const userType = document.getElementById('userType').value;
+            const bActive = document.getElementById('bActive').value;
+            
+            await fetch(`${API_URL}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ personId, user, pass, userType, bActive })
+            });
+            fetchUsers();
         });
-
-        function validarFormulario() {
-            // Aquí iría la lógica de validación que ya tienes en script.js
-            // Retorna true si el formulario es válido, false si no lo es
-            return true; // Cambia esto por tu lógica de validación real
+        
+        async function deleteUser(id) {
+            await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+            fetchUsers();
         }
-
-        function guardarUsuario(usuario) {
-            const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-            usuarios.push(usuario);
-            localStorage.setItem('usuarios', JSON.stringify(usuarios));
+        
+        function editUser(id, user, userType, bActive) {
+            document.getElementById('personId').value = id;
+            document.getElementById('user').value = user;
+            document.getElementById('userType').value = userType;
+            document.getElementById('bActive').value = bActive;
         }
+        
+        fetchUsers();
     </script>
 </body>
 </html>
